@@ -76,27 +76,6 @@ apicore
   .then(({ keywords }) => {
     console.log(keywords)
   })
-
-// Display the available topics for a specific language
-apicore
-  .topics('fr')
-  .then(({ topics }) => {
-    console.log(topics)
-  })
-
-// Display the editor's choice for a specific topic
-apicore
-  .topicIndex('Sport', 'fr')
-  .then(({ documents }) => {
-    console.log(documents)
-  })
-
-// Display the feed for a specific topic
-apicore
-  .topicFeed('Sport', 'fr')
-  .then(({ documents }) => {
-    console.log(documents)
-  })
 ```
 
 ### Query parser
