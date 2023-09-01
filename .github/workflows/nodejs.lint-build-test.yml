@@ -1,0 +1,26 @@
+name: NodeJS Lint, Build and Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '15.x'
+    - run: npm ci
+    - run: npm run lint
+    - run: npm run build
+    - run: npm test
+      env:
+        APICORE_BASE_URL: ${{ secrets.APICORE_BASE_URL }}
+        APICORE_API_KEY: ${{ secrets.APICORE_API_KEY }}
+        APICORE_CLIENT_ID: ${{ secrets.APICORE_CLIENT_ID }}
+        APICORE_CLIENT_SECRET: ${{ secrets.APICORE_CLIENT_SECRET }}
+        APICORE_USERNAME: ${{ secrets.APICORE_USERNAME }}
+        APICORE_PASSWORD: ${{ secrets.APICORE_PASSWORD }}
+        APICORE_CUSTOM_AUTH_URL: ${{ secrets.APICORE_CUSTOM_AUTH_URL }}
