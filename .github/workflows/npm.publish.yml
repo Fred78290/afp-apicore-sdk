@@ -1,9 +1,11 @@
 name: NPM publish CD workflow
 
 on:
-  release:
-    # This specifies that the build will be triggered when we publish a release
-    types: [published]
+  push:
+    branches:
+      - main
+    tags:
+      - v[0-9]+\.[0-9]+\.[0-9]+\.
 
 jobs:
   build:
@@ -12,13 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        # "ref" specifies the branch to check out.
-        # "github.event.release.target_commitish" is a global variable and specifies the branch the release targeted
-        ref: ${{ github.event.release.target_commitish }}
-    # install Node.js
-    - uses: actions/setup-node@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3.8.1
       with:
         node-version: '15.x'
         # Specifies the registry, this field is required!
@@ -26,10 +23,13 @@ jobs:
     # clean install of your projects' deps. We use "npm ci" to avoid package lock changes
     - run: npm ci
     # set up git since we will later push to the repo
-    - run: git config --global user.name "Fred78290 CD Github"
-    - run: git config --global user.email "julesbonnard@gmail.com"
+    - run: |
+        git config --global user.name "${{ secrets.GIT_USER_NAME }}"
+        git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
     # upgrade npm version in package.json to the tag used in the release.
-    - run: npm version ${{ github.event.release.tag_name }}
+    - run: |
+        TAG=${GITHUB_REF#refs/tags/v}
+        npm version ${TAG}
     # build the project
     - run: npm run build
     # publish to NPM
