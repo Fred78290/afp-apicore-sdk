@@ -2,6 +2,10 @@ name: NodeJS Lint, Build and Test
 
 on:
   push:
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.ts'
+      - 'tests/*.ts'
   pull_request:
 
 jobs:
