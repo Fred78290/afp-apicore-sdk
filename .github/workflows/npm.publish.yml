@@ -36,7 +36,9 @@ jobs:
         # Use a token to publish to NPM.
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     # push the version changes to GitHub
-    - run: git push
+    - run: |
+        git commit -a -m 'Update version'
+        git push
       env:
         # The secret is passed automatically. Nothing to configure.
         github-token: ${{ secrets.GITHUB_TOKEN }}
