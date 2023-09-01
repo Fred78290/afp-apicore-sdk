@@ -358,7 +358,7 @@ export interface Faces {
 }
 
 
-export interface AfpDocument {
+export interface ApiCoreDocument {
   advisory: string
   afpentity: {
     album: AfpEntity[]
@@ -470,9 +470,9 @@ export interface AfpDocument {
   wordCount: number
 }
 
-export interface AfpResponseDocuments {
+export interface ApiCoreResponseDocuments {
   response: {
-    docs: AfpDocument[]
+    docs: ApiCoreDocument[]
     numFound: number
   }
 }
@@ -482,7 +482,7 @@ export interface Topic {
   count: number
 }
 
-export interface AfpResponseTopics {
+export interface ApiCoreResponseTopics {
   response: {
     topics: Topic[]
     numFound: number

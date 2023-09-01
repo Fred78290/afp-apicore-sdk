@@ -1,6 +1,6 @@
 import ApiCoreAuth from './authentication'
 import defaultSearchParams from '../default-search-params'
-import { AfpResponseDocuments, AfpResponseTopics, ClientCredentials, Lang, Params, Query, Request, Token, SortField, SortOrder, AfpDocument } from '../types'
+import { ApiCoreResponseDocuments, ApiCoreResponseTopics, ClientCredentials, Lang, Params, Query, Request, Token, SortField, SortOrder, ApiCoreDocument } from '../types'
 import buildQuery from '../utils/query-builder'
 import { get, post } from '../utils/request'
 
@@ -154,7 +154,7 @@ export default class ApiCoreSearch extends ApiCoreAuth {
       sortOrder: sortOrder as SortOrder
     }
 
-    const data: AfpResponseDocuments = await post(`${this.baseUrl}/v1/api/search`, body, {
+    const data: ApiCoreResponseDocuments = await post(`${this.baseUrl}/v1/api/search`, body, {
       headers: this.authorizationBearerHeaders
     })
 
@@ -169,7 +169,7 @@ export default class ApiCoreSearch extends ApiCoreAuth {
   public async get (uno: string) {
     await this.authenticate()
 
-    const data: AfpResponseDocuments = await get(`${this.baseUrl}/v1/api/get/${uno}`, {
+    const data: ApiCoreResponseDocuments = await get(`${this.baseUrl}/v1/api/get/${uno}`, {
       headers: this.authorizationBearerHeaders
     })
     const docs = data.response.docs
@@ -179,7 +179,7 @@ export default class ApiCoreSearch extends ApiCoreAuth {
   public async mlt (uno: string, lang: Lang, size: number = 10) {
     await this.authenticate()
 
-    const data: AfpResponseDocuments = await get(`${this.baseUrl}/v1/api/mlt`, {
+    const data: ApiCoreResponseDocuments = await get(`${this.baseUrl}/v1/api/mlt`, {
       headers: this.authorizationBearerHeaders,
       params: {
         uno,
@@ -189,7 +189,7 @@ export default class ApiCoreSearch extends ApiCoreAuth {
     })
 
     let count = 0
-    let documents: AfpDocument[] = []
+    let documents: ApiCoreDocument[] = []
 
     if (data.response.numFound) {
       count = data.response.numFound
@@ -245,7 +245,7 @@ export default class ApiCoreSearch extends ApiCoreAuth {
       ...optionnalParams
     }
 
-    const data: AfpResponseTopics = await post(`${this.baseUrl}/v1/api/list/${facet}`, body, {
+    const data: ApiCoreResponseTopics = await post(`${this.baseUrl}/v1/api/list/${facet}`, body, {
       headers: this.authorizationBearerHeaders,
       params: {
         minDocCount
