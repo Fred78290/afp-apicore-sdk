@@ -27,7 +27,7 @@ jobs:
     # upgrade npm version in package.json to the tag used in the release.
     - run: |
         TAG=${GITHUB_REF#refs/tags/v}
-        npm version ${TAG}
+        npm version --allow-same-version --no-git-tag-version ${TAG}
     # build the project
     - run: npm run build
     # publish to NPM

@@ -1,6 +1,7 @@
 # ApiCore API
 
 [![NodeJS Lint, Build and Test](https://github.com/Fred78290/afp-apicore-sdk/actions/workflows/nodejs.lint-build-test.yml/badge.svg?branch=main)](https://github.com/Fred78290/afp-apicore-sdk/actions/workflows/nodejs.lint-build-test.yml)
+[![NPM publish CD workflow](https://github.com/Fred78290/afp-apicore-sdk/actions/workflows/npm.publish.yml/badge.svg?branch=main)](https://github.com/Fred78290/afp-apicore-sdk/actions/workflows/npm.publish.yml)
 
 This project is aimed to help javascript developers use the [AFP API ApiCore](https://afp-apicore-prod.afp.com/).
 
