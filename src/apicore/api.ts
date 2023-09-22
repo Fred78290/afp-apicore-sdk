@@ -71,8 +71,29 @@ const mapSearchParams = new Map([
   ['urgencies', 'urgency']
 ])
 
+interface ApiCoreSocialStoryResponse {
+  expires: string
+  clientID: string
+  role: string
+  cost: string
+  serial: string
+  uno: string
+  link: string
+  available: string
+  href: string
+  userID: string
+  queryID: string
+}
+
 export default class ApiCoreSearch extends ApiCoreAuth {
-  constructor (credentials: ClientCredentials & { baseUrl?: string; saveToken?: (token: Token | null) => void } = {}) {
+
+  constructor (credentials: ClientCredentials & {
+    baseUrl?: string
+    saveToken?: (token: Token | null) => void
+    webStoryProxy?: string
+    webStoryProxyKey?: string
+   } = {}
+  ) {
     super(credentials)
   }
 
@@ -270,5 +291,41 @@ export default class ApiCoreSearch extends ApiCoreAuth {
       count,
       keywords
     }
+  }
+
+  public async story (uno: string) {
+
+    const doc = await this.get(uno)
+
+    if (doc !== null) {
+      if (doc.class === 'webstory') {
+        const data: ApiCoreSocialStoryResponse = await get(doc.href.replace('xml', 'webstory'), {
+          headers: this.authorizationBearerHeaders
+        })
+
+        let href: string = ''
+        let proxified: boolean
+        const uno = data.uno
+        const serial = data.serial
+        const cost = data.cost ? parseInt(data.cost, 10) : 0
+
+        if (cost > 0 || ! this.webStoryProxy) {
+          href = `${this.baseUrl}${data.href}`
+          proxified = false
+        } else {
+          href = `${this.webStoryProxy}${data.href.substring('/objects/api/webstory'.length)}`
+          proxified = true
+        }
+
+        return {
+          uno,
+          serial,
+          href,
+          proxified
+        }
+      }
+    }
+
+    return null
   }
 }

@@ -183,4 +183,20 @@ describe('AFP ApiCore Search', () => {
       expect(news.keywords[0].count).toBeGreaterThanOrEqual(1)
     })
   })
+
+  describe('Social story', () => {
+    test('should return webstory href', async () => {
+      const uno = 'newsml.afp.com.20230901T150953Z.doc-33u64eh'
+      const apicore = new ApiCore({ baseUrl, clientId, clientSecret })
+      await apicore.authenticate({ username, password })
+      const story = await apicore.story('newsml.afp.com.20230901T150953Z.doc-33u64eh')
+
+      if (story === null) {
+        expect(story).toBeTruthy()
+      } else {
+        expect(typeof story).toBe('object')
+        expect(story.uno).toEqual(uno)
+      }
+    })
+  })
 })
