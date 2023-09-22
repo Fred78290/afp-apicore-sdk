@@ -106,6 +106,7 @@ describe('AFP ApiCore Search', () => {
 
       const news = await apicore.search(null, ['title'])
 
+      expect(Array.isArray(news.documents)).toBeTruthy()
       expect(news.documents.length).toBeGreaterThanOrEqual(1)
 
       const firstDocument = news.documents[0]
@@ -142,8 +143,12 @@ describe('AFP ApiCore Search', () => {
       const uno = documents[0].uno
       const doc = await apicore.get(uno)
 
-      expect(typeof doc).toBe('object')
-      expect(doc.uno).toEqual(uno)
+      if (doc === null) {
+        expect(doc).toBeTruthy()
+      } else {
+        expect(typeof doc).toBe('object')
+        expect(doc.uno).toEqual(uno)
+      }
     })
 
     test('should return an error when document doesn\'t exist', async () => {
