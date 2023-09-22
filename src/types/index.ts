@@ -394,6 +394,7 @@ export interface ApiCoreDocument {
   countryname: string
   country_only: string[]
   country_out: string[]
+  cost: string
   created: string
   creator: string
   dept: string
