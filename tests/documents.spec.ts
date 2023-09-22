@@ -70,12 +70,12 @@ describe('AFP ApiCore Search', () => {
       const customParams: Params = {
         dateFrom: 'now-1M',
         dateTo: 'now-1d',
-        langs: ['fr'],
-        urgencies: [3],
+        langs: 'fr',
+        urgencies: 3,
         size: 15,
         sortField: 'published',
         sortOrder: 'asc',
-        products: ['news'],
+        classes: 'text',
         sources: ['afp'],
         topics: []
       }
