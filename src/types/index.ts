@@ -96,6 +96,7 @@ export type Lang =
   'zh-tw' |
   'zh-cn'
 
+export type DocumentClass =  'picture' | 'text' | 'multimedia' | 'video' | 'graphic' | 'webstory' | 'videography' | 'livereport'
 export type Urgency = 1 | 2 | 3 | 4 | 5
 export type SortField = 'published'
 export type SortOrder = 'asc' | 'desc'
@@ -381,7 +382,7 @@ export interface ApiCoreDocument {
   channel: string[]
   city: string
   citycode: string
-  class: string
+  class: DocumentClass
   comment: string[]
   contains_video: string
   contentCreated: string
