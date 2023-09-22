@@ -490,3 +490,53 @@ export interface ApiCoreResponseTopics {
     numFound: number
   }
 }
+
+export interface ApiCoreLiveReportIndex {
+  created: string
+  href: string
+  index: string
+  liveReportID: string
+  modified: string
+  onair: boolean
+  title: string
+}
+
+export interface ApiCoreLiveReportMediaItem {
+  href: string
+  creator: string
+  source: string
+  provider: string
+  caption: string
+  type: string
+  rendition: string
+  role: string
+  width: number
+  height: number
+}
+
+export interface ApiCoreLiveReportItem {
+  uno: string
+  serial: string
+  text: string[]
+  created: string
+  updated: string
+  revision: number
+  provider: string
+  type: string
+  description: string
+  medias: ApiCoreLiveReportMediaItem[]
+}
+export interface ApiCoreLiveReportDocument {
+  liveReportID: string
+  onair: boolean
+  href: string
+  title: string
+  status: Status
+  serial: string
+  lang: Lang
+  city: string
+  country: string
+  location: GeoLoc
+  provider: string
+  items: ApiCoreLiveReportItem[]
+}
