@@ -89,8 +89,8 @@ describe('AFP ApiCore Search', () => {
       const firstDocument = news.documents[0]
 
       expect(typeof firstDocument).toBe('object')
-      expect(firstDocument.lang).toBe((customParams.langs as string[])[0])
-      expect(firstDocument.urgency).toBe((customParams.urgencies as number[])[0])
+      expect(firstDocument.lang).toBe(customParams.langs)
+      expect(firstDocument.urgency).toBe(customParams.urgencies)
 
       const lastDocument = news.documents[news.documents.length - 1]
 
@@ -117,7 +117,7 @@ describe('AFP ApiCore Search', () => {
     test('should work with multiple languages', async () => {
       const apicore = new ApiCore({ baseUrl, clientId, clientSecret })
       await apicore.authenticate({ username, password })
-      const news = await apicore.search({ langs: ['fr', 'en'], size: 100, products: ['news'] }, ['lang'])
+      const news = await apicore.search({ langs: ['fr', 'en'], size: 100, classes: 'text' }, ['lang'])
 
       expect(news.documents.length).toBeGreaterThanOrEqual(1)
 

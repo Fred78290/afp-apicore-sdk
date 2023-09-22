@@ -88,15 +88,22 @@ export default class ApiCoreSearch extends ApiCoreAuth {
       if (mapSearchParams.has(key)) {
         const field = mapSearchParams.get(key)
 
-        if (value && value.length > 0) {
-          if (value.length === 1) {
-            optionnalRequest.push({
-              value: value[0],
-              name: field
-            })
+        if (value) {
+          if (Array.isArray(value)) {
+            if (value.length === 1) {
+              optionnalRequest.push({
+                value: value[0],
+                name: field
+              })
+            } else if (value.length > 1) {
+              optionnalRequest.push({
+                in: value,
+                name: field
+              })
+            }
           } else {
             optionnalRequest.push({
-              in: value,
+              value: value,
               name: field
             })
           }
@@ -172,8 +179,13 @@ export default class ApiCoreSearch extends ApiCoreAuth {
     const data: ApiCoreResponseDocuments = await get(`${this.baseUrl}/v1/api/get/${uno}`, {
       headers: this.authorizationBearerHeaders
     })
-    const docs = data.response.docs
-    return docs[0]
+
+    if (data.response.docs && data.response.docs.length > 0) {
+      const docs = data.response.docs
+      return docs[0]
+    }
+
+    return null
   }
 
   public async mlt (uno: string, lang: Lang, size: number = 10) {
