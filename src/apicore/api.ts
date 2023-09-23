@@ -2,7 +2,7 @@ import ApiCoreAuth from './authentication'
 import defaultSearchParams from '../default-search-params'
 import { ApiCoreResponseDocuments, ApiCoreResponseTopics, ClientCredentials, Lang, Params, Query, Request, Token, SortField, SortOrder, ApiCoreDocument } from '../types'
 import buildQuery from '../utils/query-builder'
-import { get, post } from '../utils/request'
+import { get, gettext, post } from '../utils/request'
 
 const mapSearchParams = new Map([
   ['advisories', 'advisory'],
@@ -293,6 +293,10 @@ export default class ApiCoreSearch extends ApiCoreAuth {
     }
   }
 
+  private insert (mainString: string, insString: string, pos: number) {
+    return mainString.slice(0, pos) + insString + mainString.slice(pos)
+  }
+
   public async story (uno: string) {
 
     const doc = await this.get(uno)
@@ -308,6 +312,7 @@ export default class ApiCoreSearch extends ApiCoreAuth {
         const uno = data.uno
         const serial = data.serial
         const cost = data.cost ? parseInt(data.cost, 10) : 0
+        const link = `${this.baseUrl}${data.href}`
 
         if (cost > 0 || ! this.webStoryProxy) {
           href = `${this.baseUrl}${data.href}`
@@ -321,8 +326,35 @@ export default class ApiCoreSearch extends ApiCoreAuth {
           uno,
           serial,
           href,
+          link,
           proxified
         }
+      }
+    }
+
+    return null
+  }
+
+  public async storycontent (uno: string) {
+
+    const doc = await this.story(uno)
+
+    if (doc !== null) {
+      const uno = doc.uno
+      const serial = doc.serial
+      const href = doc.link
+      const docbase = `<base href="${href}" />`
+      const head = '<head>'
+
+      let content: string = await gettext(doc.link, {})
+
+      content = this.insert(content, docbase, content.indexOf(head) + head.length)
+
+      return {
+        uno,
+        serial,
+        href,
+        content
       }
     }
 
