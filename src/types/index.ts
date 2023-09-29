@@ -109,6 +109,7 @@ export interface Params {
   dateTo?: string
   dateFrom?: string
   size?: number
+  native?: any
 
   advisories?: string[]|string
   afpshortids?: string[]|string

@@ -105,6 +105,10 @@ export default class ApiCoreSearch extends ApiCoreAuth {
     const optionnalRequest: [any?] = []
     const search = Object.assign({}, this.defaultSearchParams, params)
 
+    if (params?.native) {
+      optionnalRequest.push(params?.native)
+    }
+
     for (const [key, value] of Object.entries(search)) {
       if (mapSearchParams.has(key)) {
         const field = mapSearchParams.get(key)

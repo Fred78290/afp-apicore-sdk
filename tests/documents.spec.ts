@@ -77,7 +77,10 @@ describe('AFP ApiCore Search', () => {
         sortOrder: 'asc',
         classes: 'text',
         sources: ['afp'],
-        topics: []
+        topics: [],
+        native: {
+          missing: 'livereportid'
+        }
       }
 
       const news = await apicore.search(customParams)
