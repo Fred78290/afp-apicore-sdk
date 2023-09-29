@@ -60,7 +60,7 @@ describe('AFP ApiCore Livereport', () => {
 
       await livereport.authenticate({ username, password })
 
-      const result = await livereport.get(livereportID, 'fr')
+      const result = await livereport.livereport(livereportID, 'fr')
 
       if (result === null) {
         expect(result).toBeTruthy()

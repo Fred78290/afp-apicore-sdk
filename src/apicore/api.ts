@@ -1,4 +1,4 @@
-import ApiCoreAuth from './authentication'
+import ApiCoreLiveReport from './livereport'
 import defaultSearchParams from '../default-search-params'
 import { ApiCoreResponseDocuments, ApiCoreResponseTopics, ClientCredentials, Lang, Params, Query, Request, Token, SortField, SortOrder, ApiCoreDocument } from '../types'
 import buildQuery from '../utils/query-builder'
@@ -53,6 +53,7 @@ const mapSearchParams = new Map([
   ['ofinterestofs', 'ofinterestof'],
   ['products', 'product'],
   ['providers', 'provider'],
+  ['providerids', 'providerid.qcode'],
   ['publicIdentifiers', 'publicIdentifier'],
   ['regions', 'region'],
   ['revisions', 'revision'],
@@ -85,7 +86,7 @@ interface ApiCoreSocialStoryResponse {
   queryID: string
 }
 
-export default class ApiCoreSearch extends ApiCoreAuth {
+export default class ApiCoreSearch extends ApiCoreLiveReport {
 
   constructor (credentials: ClientCredentials & {
     baseUrl?: string

@@ -59,7 +59,7 @@ export default class ApiCoreLiveReport extends ApiCoreAuth {
     }
   }
 
-  public async get (livereportID: string, lang: Lang) {
+  public async livereport (livereportID: string, lang: Lang) {
     await this.authenticate()
 
     const data: ApiCoreLiveReportResponse = await get(`${this.baseUrl}/livereport/api/get`, {
