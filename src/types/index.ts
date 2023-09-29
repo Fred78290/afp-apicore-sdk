@@ -398,7 +398,7 @@ export interface ApiCoreDocument {
   created: string
   creator: string
   dept: string
-  disclaimer: string
+  disclaimer: string[]
   doc_creator_name: string
   embargoed: string
   entity_company: string[]
