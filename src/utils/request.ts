@@ -2,7 +2,9 @@
 import fetch, { Headers } from 'cross-fetch'
 import FormData from 'form-data'
 import status from 'statuses'
-import { AuthorizationHeaders, Form, Query } from '../types'
+import { AuthorizationHeaders, Form, Query, Subscription, SubscriptionsIdentifier, RegisterService, QuietTime } from '../types'
+
+export type HttpHeaders = AuthorizationHeaders | { [key: string]: string | number }
 
 function buildUrl (url: string, params: Object): string {
   const builtUrl = new URL(url)
@@ -104,7 +106,7 @@ export async function get (
     params?: {
       [key: string]: string | number
     }
-    headers?: AuthorizationHeaders
+    headers?: HttpHeaders
   }) {
   return fetchJson(params ? buildUrl(url, params) : url, 'GET', headers)
 }
@@ -118,14 +120,14 @@ export async function gettext (
     params?: {
       [key: string]: string | number
     }
-    headers?: AuthorizationHeaders
+    headers?: HttpHeaders
   }) {
   return fetchText(params ? buildUrl(url, params) : url, 'GET', headers)
 }
 
 export async function post (
   url: string,
-  data: Query,
+  data: Query|Subscription|SubscriptionsIdentifier|RegisterService|QuietTime,
   {
     headers,
     params
@@ -133,11 +135,27 @@ export async function post (
     params?: {
       [key: string]: string | number
     }
-    headers?: AuthorizationHeaders
+    headers?: HttpHeaders
   }) {
   headers = Object.assign({}, headers, { 'Content-Type' : 'application/json' })
 
   return fetchJson(params ? buildUrl(url, params) : url, 'POST', headers, JSON.stringify(data))
+}
+
+export async function del (
+  url: string,
+  {
+    headers,
+    params
+  }: {
+    params?: {
+      [key: string]: string | number
+    }
+    headers?: HttpHeaders
+  }, body?: unknown) {
+  headers = Object.assign({}, headers, { 'Content-Type' : 'application/json' })
+
+  return fetchJson(params ? buildUrl(url, params) : url, 'DELETE', headers, body ? JSON.stringify(body) : undefined)
 }
 
 export async function postForm (
@@ -146,7 +164,7 @@ export async function postForm (
   {
     headers
   }: {
-    headers: AuthorizationHeaders
+    headers: HttpHeaders
   }) {
   const form = buildForm(formData)
 

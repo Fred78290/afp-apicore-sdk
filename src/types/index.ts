@@ -541,3 +541,83 @@ export interface ApiCoreLiveReportDocument {
   provider: string
   items: ApiCoreLiveReportItem[]
 }
+
+export interface QuietTime {
+  endTime: string
+  startTime: string
+  tz: string
+}
+
+export interface Subscription {
+  dontDisturb: boolean
+  langues: Lang[]
+  query: Request
+  quietTime?: QuietTime
+}
+
+export interface RegisteredSubscription extends Subscription {
+  name: string
+  identifier: string
+}
+export interface HttpServiceData {
+  href: string
+  user: string
+  password: string
+}
+
+export interface MailServiceData {
+  address: string
+}
+
+export interface ActiveMQServiceData {
+  url: string
+  type: string
+  queueName: string
+  username: string
+  password: string
+  ttlInSeconds: string
+  qosEnabled: string
+  deliveryMode: string
+}
+
+export interface SQSServiceData {
+  accessKey: string
+  secretKey: string
+  region: string
+  queue: string
+  ownerID: string
+}
+export interface RegisterService {
+  datas: ServiceData
+  name: string
+  type: ServiceType
+}
+
+export type ServiceData = HttpServiceData|MailServiceData|ActiveMQServiceData|SQSServiceData
+export interface RegisteredService extends ServiceDetail{
+  createdDate: string
+  lastRegisteredDate: string
+}
+
+export interface ServiceDetail {
+  serviceIdentifier: string
+  serviceName: string
+  serviceType: ServiceType
+  shared: true
+}
+
+export interface SubscriptionsInService {
+  name: string
+  dontDisturb: boolean
+  langues: Lang[]
+  query: Query
+  services: ServiceDetail[]
+  quietTime: {
+    endTime: string
+    startTime: string
+    tz: string
+  }
+}
+
+export type ServiceType = 'mail' | 'rest' | 'sqs' | 'jms'
+export type SubscriptionsIdentifier = string[]

@@ -7,7 +7,7 @@ const configPath = process.env.DOTENV_CONFIG_PATH === undefined && 'apicore.env'
 dotenv.config({ path: configPath })
 
 const {
-  APICORE_BASE_URL: baseUrl,
+  APICORE_PROD_URL: baseUrl,
   APICORE_CLIENT_ID: clientId,
   APICORE_CLIENT_SECRET: clientSecret,
   APICORE_USERNAME: username,
