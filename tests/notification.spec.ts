@@ -92,7 +92,7 @@ describe('AFP ApiCore Notification', () => {
       }
     })
 
-    /*afterAll(async () => {
+    afterAll(async () => {
       const services = await notificationCenter.listServices()
 
       if (services?.map(s => s.serviceName).includes(testServiceName)) {
@@ -104,7 +104,7 @@ describe('AFP ApiCore Notification', () => {
 
         await notificationCenter.deleteService(testServiceName)
       }
-    })*/
+    })
 
     test('should create a subscription in service', async () => {
       const subscription = notificationCenter.buildSubscription({ langs: 'fr', urgencies: 2, classes: 'text'})

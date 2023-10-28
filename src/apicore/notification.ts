@@ -69,6 +69,7 @@ export default class ApiCoreNotificationCenter {
   get httpHeaders (): HttpHeaders {
     return {
       ...this.auth.authorizationBearerHeaders,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'Content-Type': 'application/json'
     }
   }
@@ -200,6 +201,11 @@ export default class ApiCoreNotificationCenter {
       }
     })
 
+    // empty response from apicore
+    if (data.response.status.code === 204) {
+      return name
+    }
+
     return data.response.uno
   }
 
@@ -219,7 +225,7 @@ export default class ApiCoreNotificationCenter {
   public async listSubscriptions () {
     await this.authenticate()
 
-    const data: ListNotificationSubscriptionResponse = await get(`${this.baseUrl}/subscription/lists`, {
+    const data: ListNotificationSubscriptionResponse = await get(`${this.baseUrl}/subscription/list`, {
       headers: this.httpHeaders
     })
 

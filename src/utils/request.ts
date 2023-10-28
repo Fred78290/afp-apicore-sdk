@@ -74,18 +74,30 @@ async function fetchJson (url: string, method: string, headers: object = {}, bod
   }
 
   try {
-    json = await response.json()
+    if (response.status !== 204) {
+      json = await response.json()
 
-    if (json.error) {
-      httpStatus = {
-        code: json.error.code,
-        message: json.error.message
+      if (json.error) {
+        httpStatus = {
+          code: json.error.code,
+          message: json.error.message
+        }
+      }
+    } else {
+      json = {
+        response: {
+          status: {
+            code: 204,
+            reason: response.statusText
+          }
+        }
       }
     }
   } catch (e) {
     if (response.ok) {
       httpStatus = {
-        code: 520
+        code: 520,
+        message: 'JSON invalid'
       }
     }
   }
