@@ -19,7 +19,7 @@ export default class ApiCoreAuth {
       clientSecret,
       baseUrl,
       customAuthUrl,
-      saveToken,
+      saveToken
     }: ClientCredentials & {
       baseUrl?: string
       saveToken?: (token: Token | null) => void

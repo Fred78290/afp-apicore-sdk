@@ -4,6 +4,11 @@ import { Subscription, RegisteredSubscription, SubscriptionsIdentifier, Register
 import defaultSearchParams from '../default-search-params'
 import defaultSubscriptionParams from '../default-notification-params'
 import { HttpHeaders, get, post, del } from '../utils/request'
+import moment from 'moment-timezone'
+
+const timeFormat = 'HH:mm:ss'
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+const utc = 'UTC'
 
 interface Status {
   code: number
@@ -64,12 +69,26 @@ export default class ApiCoreNotificationCenter {
   get httpHeaders (): HttpHeaders {
     return {
       ...this.auth.authorizationBearerHeaders,
-      'content-type': 'application/json'
+      'Content-Type': 'application/json'
     }
+  }
+  private adjustTime (time: string, tz: string = timeZone): string {
+    return moment.tz(time, timeFormat, tz).tz(utc).format(timeFormat)
   }
 
   get defaultSubscriptionParams (): Subscription {
-    return defaultSubscriptionParams as Subscription
+    const defaultSubscription = {
+      ...defaultSubscriptionParams as Subscription
+    }
+
+    // Set to local time the quiet périod
+    if (defaultSubscription.quietTime) {
+      defaultSubscription.quietTime.tz = utc
+      defaultSubscription.quietTime.startTime = this.adjustTime(defaultSubscription.quietTime.startTime)
+      defaultSubscription.quietTime.endTime = this.adjustTime(defaultSubscription.quietTime.endTime)
+    }
+
+    return defaultSubscription
   }
 
   get defaultSearchParams (): Params {
@@ -88,7 +107,7 @@ export default class ApiCoreNotificationCenter {
     await this.authenticate()
 
     const data: AddNotificationSubscriptionToServiceResponse = await post(`${this.baseUrl}/service/add`, subscriptions, {
-      headers: this.httpHeaders,
+      headers: this.auth.authorizationBearerHeaders,
       params: {
         service: service
       }
@@ -101,7 +120,7 @@ export default class ApiCoreNotificationCenter {
     await this.authenticate()
 
     const data: DeleteServiceResponse = await del(`${this.baseUrl}/service/delete`, {
-      headers: this.httpHeaders,
+      headers: this.auth.authorizationBearerHeaders,
       params: {
         service: service
       }
@@ -124,7 +143,7 @@ export default class ApiCoreNotificationCenter {
     await this.authenticate()
 
     const data: RegisteredServiceResponse = await post(`${this.baseUrl}/service/register`, service, {
-      headers: this.httpHeaders
+      headers: this.auth.authorizationBearerHeaders
     })
 
     return data.response.uno
@@ -134,7 +153,7 @@ export default class ApiCoreNotificationCenter {
     await this.authenticate()
 
     const data: DeleteNotificationSubscriptionResponse = await del(`${this.baseUrl}/service/remove`, {
-      headers: this.httpHeaders,
+      headers: this.auth.authorizationBearerHeaders,
       params: {
         service: service
       }
@@ -160,7 +179,7 @@ export default class ApiCoreNotificationCenter {
     await this.authenticate()
 
     const data: AddNotificationSubscriptionResponse = await post(`${this.baseUrl}/subscription/add`, query, {
-      headers: this.httpHeaders,
+      headers: this.auth.authorizationBearerHeaders,
       params: {
         name: name,
         service: service
@@ -174,7 +193,7 @@ export default class ApiCoreNotificationCenter {
     await this.authenticate()
 
     const data: DeleteNotificationSubscriptionResponse = await del(`${this.baseUrl}/subscription/delete`, {
-      headers: this.httpHeaders,
+      headers: this.auth.authorizationBearerHeaders,
       params: {
         name: name,
         service: service
@@ -207,32 +226,33 @@ export default class ApiCoreNotificationCenter {
     return data.response.subscriptions
   }
 
-  public async setQuietTime (name: string, quietTime: QuietTime) {
+  public async setQuietTime (name: string, enabled: boolean, quietTime: QuietTime) {
     await this.authenticate()
 
     const data: SetQuietTimeResponse = await post(`${this.baseUrl}/subscription/quiettime`, quietTime, {
-      headers: this.httpHeaders,
-      params: {
-        name: name
-      }
-    })
-
-    return data.response.uno
-  }
-
-  public async updateSubscription (name: string, service: string, query: Subscription) {
-    await this.authenticate()
-
-    const data: UpdateNotificationSubscriptionResponse = await post(`${this.baseUrl}/subscription/update`, query, {
-      headers: this.httpHeaders,
+      headers: this.auth.authorizationBearerHeaders,
       params: {
         name: name,
-        service: service
+        quiet: enabled
       }
     })
 
     return data.response.uno
   }
+
+  //  public async updateSubscription (name: string, service: string, query: Subscription) {
+  //    await this.authenticate()
+  //
+  //    const data: UpdateNotificationSubscriptionResponse = await post(`${this.baseUrl}/subscription/update`, query, {
+  //      headers: this.auth.authorizationBearerHeaders,
+  //      params: {
+  //        name: name,
+  //        service: service
+  //      }
+  //    })
+  //
+  //    return data.response.uno
+  //  }
 
   public buildSubscription (params: Params, dontDisturb?: boolean, quietTime?: QuietTime): Subscription {
     const {
@@ -262,13 +282,24 @@ export default class ApiCoreNotificationCenter {
     }
 
     if (quietTime) {
-      optionnalParams.quietTime = quietTime
+      optionnalParams.quietTime = {
+        ...quietTime
+      }
+
+      // Translate it to UTC
+      if (quietTime.tz.toUpperCase() !== utc) {
+        optionnalParams.quietTime.startTime = this.adjustTime(quietTime.startTime, quietTime.tz)
+        optionnalParams.quietTime.endTime = this.adjustTime(quietTime.endTime, quietTime.tz)
+        optionnalParams.quietTime.tz = timeZone
+      }
     }
 
     const result: Subscription = {
       ...this.defaultSubscriptionParams,
       ...optionnalParams,
-      query: buildQueryFromParams(this.defaultSearchParams, { params: params}).query
+      query: buildQueryFromParams(this.defaultSearchParams, {
+        params: params
+      }).query
     }
 
     return result

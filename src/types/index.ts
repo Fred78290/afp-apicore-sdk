@@ -84,6 +84,7 @@ export interface Request {
   name?: Field
   in?: Array<string | number>
   exclude?: Array<string | number>
+  value?: string | number
 }
 
 export type Lang =

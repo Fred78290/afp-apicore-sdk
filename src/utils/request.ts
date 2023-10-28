@@ -133,7 +133,7 @@ export async function post (
     params
   }: {
     params?: {
-      [key: string]: string | number
+      [key: string]: string | number | boolean
     }
     headers?: HttpHeaders
   }) {

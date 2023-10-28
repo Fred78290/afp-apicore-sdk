@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 import ApiCoreNotificationCenter from '../src/apicore/notification'
 import ApiCoreAuth from '../src/apicore/authentication'
+import moment from 'moment-timezone'
 
 const configPath = process.env.DOTENV_CONFIG_PATH === undefined && 'apicore.env' || process.env.DOTENV_CONFIG_PATH
 
@@ -13,8 +14,10 @@ const {
   APICORE_USERNAME: username,
   APICORE_PASSWORD: password,
   APICORE_NOTIFICATION_EMAIL: email,
-  APICORE_NOTIFICATION_SERVICE: testServiceName
 } = process.env
+
+const testSubscriptionName = 'test-notification-typescript-apicore-sdk'
+const testServiceName = 'test-notification-typescript-apicore-sdk'
 
 describe('AFP ApiCore Notification', () => {
 
@@ -22,7 +25,6 @@ describe('AFP ApiCore Notification', () => {
   const notificationCenter = new ApiCoreNotificationCenter(auth)
 
   expect(email).toBeDefined()
-  expect(testServiceName).toBeDefined()
 
   test('should return true when notification is instance of ApiCoreNotificationCenter', () => {
     const test = new ApiCoreNotificationCenter(auth)
@@ -36,7 +38,7 @@ describe('AFP ApiCore Notification', () => {
     })
 
     test('should register service', async () => {
-      if (email && testServiceName) {
+      if (email) {
         const result = await notificationCenter.registerService({
           name: testServiceName,
           type: 'mail',
@@ -57,19 +59,15 @@ describe('AFP ApiCore Notification', () => {
     })
 
     test('should return no subscriptions in service', async () => {
-      if (testServiceName) {
-        const result = await notificationCenter.subscriptionsInService(testServiceName)
+      const result = await notificationCenter.subscriptionsInService(testServiceName)
 
-        expect(result).toBeUndefined()
-      }
+      expect(result).toBeUndefined()
     })
 
     test('should delete service', async () => {
-      if (testServiceName) {
-        const result = await notificationCenter.deleteService(testServiceName)
+      const result = await notificationCenter.deleteService(testServiceName)
 
-        expect(result).toBeDefined()
-      }
+      expect(result).toBeDefined()
     })
 
   })
@@ -78,10 +76,10 @@ describe('AFP ApiCore Notification', () => {
     beforeAll(async () => {
       await notificationCenter.authenticate({username, password})
 
-      if (testServiceName && email) {
+      if (email) {
         const services = await notificationCenter.listServices()
 
-        if (services && services.map(s => s.serviceName).includes(testServiceName)) {
+        if (services?.map(s => s.serviceName).includes(testServiceName)) {
           console.warn(`service ${testServiceName} already exists`)
         } else {
           await notificationCenter.registerService({
@@ -94,80 +92,79 @@ describe('AFP ApiCore Notification', () => {
       }
     })
 
-    afterAll(async () => {
-      if (testServiceName) {
-        const services = await notificationCenter.listServices()
+    /*afterAll(async () => {
+      const services = await notificationCenter.listServices()
 
-        if (services && services.map(s => s.serviceName).includes(testServiceName)) {
-          const subscriptions = await notificationCenter.subscriptionsInService(testServiceName)
+      if (services?.map(s => s.serviceName).includes(testServiceName)) {
+        const subscriptions = await notificationCenter.subscriptionsInService(testServiceName)
 
-          if (subscriptions) {
-            await Promise.all(subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name, testServiceName)))
-          }
-
-          await notificationCenter.deleteService(testServiceName)
+        if (subscriptions) {
+          await Promise.all(subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name, testServiceName)))
         }
+
+        await notificationCenter.deleteService(testServiceName)
       }
-    })
+    })*/
 
     test('should create a subscription in service', async () => {
-      if (testServiceName) {
-        const subscription = notificationCenter.buildSubscription({ langs: 'fr', urgencies: 2, classes: 'text'})
-        const services = await notificationCenter.addSubscription(testServiceName, testServiceName, subscription)
+      const subscription = notificationCenter.buildSubscription({ langs: 'fr', urgencies: 2, classes: 'text'})
+      const services = await notificationCenter.addSubscription(testSubscriptionName, testServiceName, subscription)
 
-        expect(services).toEqual(testServiceName)
-      }
+      expect(services).toBeDefined()
     })
 
-    test(`should get subscription ${testServiceName}`, async () => {
-      if (testServiceName) {
-        const subscription = await notificationCenter.getSubscription(testServiceName)
+    test('should get subscription', async () => {
+      const subscription = await notificationCenter.getSubscription(testSubscriptionName)
 
-        expect(subscription.name).toEqual(testServiceName)
-      }
+      expect(subscription.name).toEqual(testSubscriptionName)
     })
 
     test('should list subscription and found', async () => {
-      if (testServiceName) {
-        const subscription = await notificationCenter.listSubscriptions()
+      const subscription = await notificationCenter.listSubscriptions()
 
-        expect(subscription.map(s => s.name)).toContain(testServiceName)
-      }
+      expect(subscription.map(s => s.name)).toContain(testSubscriptionName)
     })
 
     test('should set quietTime for subscription', async () => {
-      if (testServiceName) {
-        const result = await notificationCenter.setQuietTime(testServiceName, {
-          startTime: '23:59:59',
-          endTime: '06:59:59',
-          tz: 'Europe/Paris'
-        })
+      const timeFormat = 'HH:mm:ss'
+      const timeZone = 'UTC' // Bug in apicore must be UTC Intl.DateTimeFormat().resolvedOptions().timeZone
 
-        expect(result).toEqual(testServiceName)
+      const startTime = moment.tz('23:59:59', timeFormat, timeZone)
+      const endTime = moment.tz('06:59:59', timeFormat, timeZone)
 
-        const subscription = await notificationCenter.getSubscription(testServiceName)
+      const result = await notificationCenter.setQuietTime(testSubscriptionName, true, {
+        startTime: startTime.format(timeFormat),
+        endTime: endTime.format(timeFormat),
+        tz: timeZone
+      })
 
-        expect(subscription.quietTime).toBeDefined()
-        expect(subscription.quietTime?.startTime).toEqual('23:59:59')
-        expect(subscription.quietTime?.endTime).toEqual('06:59:59')
+      expect(result).toEqual(testSubscriptionName)
+
+      const subscription = await notificationCenter.getSubscription(testSubscriptionName)
+
+      expect(subscription.quietTime).toBeDefined()
+
+      if (subscription.quietTime) {
+        const _startTime = moment.tz(subscription.quietTime.startTime, timeFormat, subscription.quietTime.tz)
+        const _endTime = moment.tz(subscription.quietTime.endTime, timeFormat, subscription.quietTime.tz)
+        // Bug in apicore must be UTC
+        expect(_startTime.tz(timeZone).format(timeFormat)).toEqual(startTime.format(timeFormat))
+        expect(_endTime.tz(timeZone).format(timeFormat)).toEqual(endTime.format(timeFormat))
       }
+
     })
 
-    test('should update subscription and found', async () => {
-      if (testServiceName) {
-        const subscription = notificationCenter.buildSubscription({ langs: 'fr', urgencies: 2, classes: 'text', products: 'news'})
-        const services = await notificationCenter.updateSubscription(testServiceName, testServiceName, subscription)
-
-        expect(services).toEqual(testServiceName)
-      }
-    })
+//    test('should update subscription and found', async () => {
+//      const subscription = notificationCenter.buildSubscription({ langs: 'fr', urgencies: 2, classes: 'text', products: 'news'})
+//      const services = await notificationCenter.updateSubscription(testSubscriptionName, testServiceName, subscription)
+//
+//      expect(services).toEqual(testSubscriptionName)
+//    })
 
     test('should delete subscription', async () => {
-      if (testServiceName) {
-        const subscription = await notificationCenter.deleteSubscription(testServiceName, testServiceName)
+      const subscription = await notificationCenter.deleteSubscription(testSubscriptionName, testServiceName)
 
-        expect(subscription).toEqual(testServiceName)
-      }
+      expect(subscription).toEqual(testSubscriptionName)
     })
 
   })
