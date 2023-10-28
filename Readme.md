@@ -101,6 +101,47 @@ apicore.search({
 
 The query parameter can be used to look precisely for a field (`title:Macron`) and may include logical parameters (`Macron OR Merkel`, `Macron AND NOT Merkel`, `title:(Macron OR Merkel) AND country:fra`).
 
+### Integrate notification in your workflow.
+
+Apicore have a service to send notification to a subscribed external service like mail or http endpoint.
+
+To use it
+```js
+let notification = new ApiCoreNotificationCenter(apicore)
+
+notificationCenter.registerService({
+  name: 'my-service-notification',
+  type: 'mail',
+  datas: {
+    address: 'nobody@nowhere.com'
+  }
+}).then(uno => {
+  console.log(`service created, uno: ${uno}`)
+
+  const dontDisturb = true
+
+  let subscription = notificationCenter.buildSubscription({
+    langs: 'fr',
+    urgencies: 2,
+    classes: 'text'
+  }, dontDisturb, {
+    startTime: '22:30:00',
+    endTime: '07:00:00',
+    tz: 'Europe/Paris'
+  })
+
+  notificationCenter.addSubscription('sample-subscription', 'my-service-notification', subscription).then(uno => {
+    console.log(`subscription created, uno: ${uno}`)
+  }).catch(e => {
+    console.error(e)
+  })
+
+}).catch(e => {
+  console.error(e)
+})
+
+````
+
 ## Development
 
 Clone the repository, then `npm install`
