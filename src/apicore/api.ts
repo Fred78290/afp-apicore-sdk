@@ -86,13 +86,93 @@ interface ApiCoreSocialStoryResponse {
   queryID: string
 }
 
+export function buildQueryFromParams (defaultSearchParams: Params, searchOptions: {
+  params?: Params | null
+  options?: {
+    maxRows?: number
+    sortField?: SortField
+    sortOrder?: SortOrder
+    fields?: string[]
+  }
+} = {}): Query {
+  const {
+    dateFrom,
+    dateTo,
+    query,
+    langs
+  } = Object.assign({}, defaultSearchParams, searchOptions.params)
+
+  const optionnalParams: any = {}
+  const optionnalRequest: [any?] = []
+  const search = Object.assign({}, defaultSearchParams, searchOptions.params)
+
+  if (searchOptions.params?.native) {
+    optionnalRequest.push(searchOptions.params?.native)
+  }
+
+  for (const [key, value] of Object.entries(search)) {
+    if (mapSearchParams.has(key)) {
+      const field = mapSearchParams.get(key)
+
+      if (value) {
+        if (Array.isArray(value)) {
+          if (value.length === 1) {
+            optionnalRequest.push({
+              value: value[0],
+              name: field
+            })
+          } else if (value.length > 1) {
+            optionnalRequest.push({
+              in: value,
+              name: field
+            })
+          }
+        } else {
+          optionnalRequest.push({
+            value: value,
+            name: field
+          })
+        }
+      }
+    }
+  }
+
+  if (langs && langs.length > 0) {
+    if (langs.length === 1) {
+      optionnalParams.lang = langs[0]
+    } else {
+      optionnalRequest.push({
+        in: langs,
+        name: 'lang'
+      })
+    }
+  }
+
+  const request: Request = {
+    and: [
+      ...optionnalRequest,
+      ...buildQuery(query)
+    ]
+  }
+
+  const result: Query = {
+    dateRange: {
+      from: dateFrom,
+      to: dateTo
+    },
+    query: request,
+    ...optionnalParams,
+    ...searchOptions.options
+  }
+
+  return result
+}
+
 export default class ApiCoreSearch extends ApiCoreLiveReport {
 
   constructor (credentials: ClientCredentials & {
     baseUrl?: string
     saveToken?: (token: Token | null) => void
-    webStoryProxy?: string
-    webStoryProxyKey?: string
    } = {}
   ) {
     super(credentials)
@@ -102,92 +182,26 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
     return defaultSearchParams as Params
   }
 
-  private appendRequest (params?: Params | null): [any?] {
-    const optionnalRequest: [any?] = []
-    const search = Object.assign({}, this.defaultSearchParams, params)
-
-    if (params?.native) {
-      optionnalRequest.push(params?.native)
-    }
-
-    for (const [key, value] of Object.entries(search)) {
-      if (mapSearchParams.has(key)) {
-        const field = mapSearchParams.get(key)
-
-        if (value) {
-          if (Array.isArray(value)) {
-            if (value.length === 1) {
-              optionnalRequest.push({
-                value: value[0],
-                name: field
-              })
-            } else if (value.length > 1) {
-              optionnalRequest.push({
-                in: value,
-                name: field
-              })
-            }
-          } else {
-            optionnalRequest.push({
-              value: value,
-              name: field
-            })
-          }
-        }
-      }
-    }
-
-    return optionnalRequest
-  }
-
   public async search (params?: Params | null, fields?: string[]) {
     const {
       size: maxRows,
-      dateFrom,
-      dateTo,
-      query,
-      langs,
       sortField,
       sortOrder
     } = Object.assign({}, this.defaultSearchParams, params)
 
     await this.authenticate()
 
-    const optionnalParams: any = {}
-    const optionnalRequest = this.appendRequest(params)
-
-    if (langs && langs.length > 0) {
-      if (langs.length === 1) {
-        optionnalParams.lang = langs[0]
-      } else {
-        optionnalRequest.push({
-          in: langs,
-          name: 'lang'
-        })
+    const query = buildQueryFromParams(this.defaultSearchParams, {
+      params: params,
+      options: {
+        maxRows: maxRows as number,
+        sortField: sortField as SortField,
+        sortOrder: sortOrder as SortOrder,
+        fields: fields
       }
-    }
+    })
 
-    const request: Request = {
-      and: [
-        ...optionnalRequest,
-        ...buildQuery(query)
-      ]
-    }
-
-    const body: Query = {
-      dateRange: {
-        from: dateFrom as string,
-        to: dateTo as string
-      },
-      maxRows: maxRows as number,
-      query: request,
-      ...optionnalParams,
-      fields,
-      sortField: sortField as SortField,
-      sortOrder: sortOrder as SortOrder
-    }
-
-    const data: ApiCoreResponseDocuments = await post(`${this.baseUrl}/v1/api/search`, body, {
+    const data: ApiCoreResponseDocuments = await post(`${this.baseUrl}/v1/api/search`, query, {
       headers: this.authorizationBearerHeaders
     })
 
@@ -244,46 +258,11 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
   }
 
   public async list (facet: string, params?: Params, minDocCount = 1) {
-    const {
-      dateFrom,
-      dateTo,
-      query,
-      langs
-    } = Object.assign({}, this.defaultSearchParams, { dateFrom: 'now-2d' }, params)
-
     await this.authenticate()
 
-    const optionnalParams: any = {}
-    const optionnalRequest = this.appendRequest(params)
+    const query = buildQueryFromParams(this.defaultSearchParams, {params})
 
-    if (langs) {
-      if (langs.length === 1) {
-        optionnalParams.lang = langs[0]
-      } else if (langs.length > 1) {
-        optionnalRequest.push({
-          in: langs,
-          name: 'lang'
-        })
-      }
-    }
-
-    const request: Request = {
-      and: [
-        ...optionnalRequest,
-        ...buildQuery(query)
-      ]
-    }
-
-    const body: any = {
-      dateRange: {
-        from: dateFrom,
-        to: dateTo
-      },
-      query: request,
-      ...optionnalParams
-    }
-
-    const data: ApiCoreResponseTopics = await post(`${this.baseUrl}/v1/api/list/${facet}`, body, {
+    const data: ApiCoreResponseTopics = await post(`${this.baseUrl}/v1/api/list/${facet}`, query, {
       headers: this.authorizationBearerHeaders,
       params: {
         minDocCount
@@ -319,13 +298,8 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
         const cost = data.cost ? parseInt(data.cost, 10) : 0
         const link = `${this.baseUrl}${data.href}`
 
-        if (cost > 0 || ! this.webStoryProxy) {
-          href = `${this.baseUrl}${data.href}`
-          proxified = false
-        } else {
-          href = `${this.webStoryProxy}${data.href.substring('/objects/api/webstory'.length)}`
-          proxified = true
-        }
+        href = `${this.baseUrl}${data.href}`
+        proxified = false
 
         return {
           uno,

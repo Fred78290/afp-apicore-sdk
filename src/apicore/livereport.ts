@@ -1,5 +1,5 @@
 import ApiCoreAuth from './authentication'
-import { ApiCoreLiveReportIndex, ApiCoreLiveReportDocument, ClientCredentials, Lang, Params, Query, Request, Token, SortField, SortOrder, ApiCoreDocument } from '../types'
+import { ApiCoreLiveReportIndex, ApiCoreLiveReportDocument, ClientCredentials, Lang, Token } from '../types'
 import { get } from '../utils/request'
 
 interface ApiCoreLiveReportsResponse {

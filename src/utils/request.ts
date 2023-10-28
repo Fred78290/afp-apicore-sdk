@@ -2,7 +2,9 @@
 import fetch, { Headers } from 'cross-fetch'
 import FormData from 'form-data'
 import status from 'statuses'
-import { AuthorizationHeaders, Form, Query } from '../types'
+import { AuthorizationHeaders, Form, Query, Subscription, SubscriptionsIdentifier, RegisterService, QuietTime } from '../types'
+
+export type HttpHeaders = AuthorizationHeaders | { [key: string]: string | number }
 
 function buildUrl (url: string, params: Object): string {
   const builtUrl = new URL(url)
@@ -72,18 +74,30 @@ async function fetchJson (url: string, method: string, headers: object = {}, bod
   }
 
   try {
-    json = await response.json()
+    if (response.status !== 204) {
+      json = await response.json()
 
-    if (json.error) {
-      httpStatus = {
-        code: json.error.code,
-        message: json.error.message
+      if (json.error) {
+        httpStatus = {
+          code: json.error.code,
+          message: json.error.message
+        }
+      }
+    } else {
+      json = {
+        response: {
+          status: {
+            code: 204,
+            reason: response.statusText
+          }
+        }
       }
     }
   } catch (e) {
     if (response.ok) {
       httpStatus = {
-        code: 520
+        code: 520,
+        message: 'JSON invalid'
       }
     }
   }
@@ -104,7 +118,7 @@ export async function get (
     params?: {
       [key: string]: string | number
     }
-    headers?: AuthorizationHeaders
+    headers?: HttpHeaders
   }) {
   return fetchJson(params ? buildUrl(url, params) : url, 'GET', headers)
 }
@@ -118,14 +132,30 @@ export async function gettext (
     params?: {
       [key: string]: string | number
     }
-    headers?: AuthorizationHeaders
+    headers?: HttpHeaders
   }) {
   return fetchText(params ? buildUrl(url, params) : url, 'GET', headers)
 }
 
 export async function post (
   url: string,
-  data: Query,
+  data: Query|Subscription|SubscriptionsIdentifier|RegisterService|QuietTime,
+  {
+    headers,
+    params
+  }: {
+    params?: {
+      [key: string]: string | number | boolean
+    }
+    headers?: HttpHeaders
+  }) {
+  headers = Object.assign({}, headers, { 'Content-Type' : 'application/json' })
+
+  return fetchJson(params ? buildUrl(url, params) : url, 'POST', headers, JSON.stringify(data))
+}
+
+export async function del (
+  url: string,
   {
     headers,
     params
@@ -133,11 +163,11 @@ export async function post (
     params?: {
       [key: string]: string | number
     }
-    headers?: AuthorizationHeaders
-  }) {
+    headers?: HttpHeaders
+  }, body?: unknown) {
   headers = Object.assign({}, headers, { 'Content-Type' : 'application/json' })
 
-  return fetchJson(params ? buildUrl(url, params) : url, 'POST', headers, JSON.stringify(data))
+  return fetchJson(params ? buildUrl(url, params) : url, 'DELETE', headers, body ? JSON.stringify(body) : undefined)
 }
 
 export async function postForm (
@@ -146,7 +176,7 @@ export async function postForm (
   {
     headers
   }: {
-    headers: AuthorizationHeaders
+    headers: HttpHeaders
   }) {
   const form = buildForm(formData)
 

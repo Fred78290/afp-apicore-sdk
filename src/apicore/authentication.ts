@@ -5,8 +5,6 @@ import { get, postForm } from '../utils/request'
 
 export default class ApiCoreAuth {
   public token: Token | undefined
-  public webStoryProxy: string | undefined
-  public webStoryProxyKey: string | undefined
 
   protected baseUrl: string
 
@@ -21,20 +19,14 @@ export default class ApiCoreAuth {
       clientSecret,
       baseUrl,
       customAuthUrl,
-      saveToken,
-      webStoryProxy,
-      webStoryProxyKey
+      saveToken
     }: ClientCredentials & {
       baseUrl?: string
       saveToken?: (token: Token | null) => void
-      webStoryProxy?: string
-      webStoryProxyKey?: string
     } = {}
   ) {
     this.credentials = { apiKey, clientId, clientSecret, customAuthUrl }
     this.baseUrl = baseUrl || 'https://afp-apicore-prod.afp.com'
-    this.webStoryProxy = webStoryProxy || undefined
-    this.webStoryProxyKey = webStoryProxyKey || undefined
     if (saveToken) {
       this.saveToken = saveToken
     } else {
@@ -54,6 +46,10 @@ export default class ApiCoreAuth {
       delete this.apiKey
       this.customAuthUrl = customAuthUrl
     }
+  }
+
+  get apiUrl (): string {
+    return this.baseUrl
   }
 
   get authUrl (): string {
