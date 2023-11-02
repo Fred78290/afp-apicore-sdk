@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import btoa from 'btoa-lite'
 import { AuthorizationHeaders, AuthType, ClientCredentials, Token } from '../types'
 import { get, postForm } from '../utils/request'
+
+function btoa (str: string, encoding?: BufferEncoding) {
+  return Buffer.from(str, encoding).toString('base64')
+}
 
 export default class ApiCoreAuth {
   public token: Token | undefined
