@@ -75,6 +75,32 @@ export default class ApiCoreAuth {
     }
   }
 
+  public async checkToken (token: string) {
+    const { user } = await get(`${this.baseUrl}/v1/user/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    return {
+      username: user.username,
+      email: user.email
+    }
+  }
+
+  public async me () {
+    await this.authenticate()
+
+    const { user } = await get(`${this.baseUrl}/v1/user/me`, {
+      headers: this.authorizationBearerHeaders
+    })
+
+    return {
+      username: user.username,
+      email: user.email
+    }
+  }
+
   public async authenticate (
     { username, password }:
     { username?: string; password?: string } = {}

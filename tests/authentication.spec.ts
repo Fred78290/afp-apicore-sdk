@@ -207,13 +207,21 @@ describe('AFP ApiCore Auth', () => {
     })
   })
 
-  // describe('User', () => {
-  //   test('should get info about user', async () => {
-  //     const apicore = new ApiCore({ baseUrl, clientId, clientSecret })
-  //     await apicore.authenticate({ username, password })
-  //     const info = await apicore.me()
-  //     expect(info.username).toEqual(username)
-  //     expect(typeof info.email).toBe('string')
-  //   })
-  // })
+  describe('User', () => {
+    test('should get info about user', async () => {
+    const apicore = new ApiCore({ baseUrl, clientId, clientSecret })
+      await apicore.authenticate({ username, password })
+      const info = await apicore.me()
+      expect(info.username).toEqual(username)
+      expect(typeof info.email).toBe('string')
+    })
+
+    test('should check token', async () => {
+      const apicore = new ApiCore({ baseUrl, clientId, clientSecret })
+        const token = await apicore.authenticate({ username, password })
+        const info = await apicore.checkToken(token.accessToken)
+        expect(info.username).toEqual(username)
+        expect(typeof info.email).toBe('string')
+      })
+    })
 })
