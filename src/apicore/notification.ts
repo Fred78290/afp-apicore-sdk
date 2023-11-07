@@ -1,7 +1,6 @@
 import ApiCoreAuth from './authentication'
-import { buildQueryFromParams } from './api'
+import buildQueryFromParams from '../utils/parametizer'
 import { Subscription, RegisteredSubscription, SubscriptionsIdentifier, RegisteredService, RegisterService, SubscriptionsInService, Params, QuietTime } from '../types'
-import defaultSearchParams from '../default-search-params'
 import defaultSubscriptionParams from '../default-notification-params'
 import { HttpHeaders, get, post, del } from '../utils/request'
 import moment from 'moment-timezone'
@@ -59,7 +58,7 @@ type AddNotificationSubscriptionResponse = CommonNotificationCenterResponse
 type DeleteNotificationSubscriptionResponse = CommonNotificationCenterResponse
 type SetQuietTimeResponse = CommonNotificationCenterResponse
 
-export default class ApiCoreNotificationCenter {
+export class ApiCoreNotificationCenter {
   private auth: ApiCoreAuth
 
   constructor (auth: ApiCoreAuth) {
@@ -93,7 +92,9 @@ export default class ApiCoreNotificationCenter {
   }
 
   get defaultSearchParams (): Params {
-    return defaultSearchParams as Params
+    return {
+      langs: []
+    }
   }
 
   get baseUrl (): string {
@@ -311,3 +312,5 @@ export default class ApiCoreNotificationCenter {
     return result
   }
 }
+
+export default ApiCoreNotificationCenter
