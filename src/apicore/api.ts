@@ -306,7 +306,8 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
           serial,
           href,
           link,
-          proxified
+          proxified,
+          cost
         }
       }
     }
