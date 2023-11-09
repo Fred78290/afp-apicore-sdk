@@ -622,3 +622,42 @@ export interface SubscriptionsInService {
 
 export type ServiceType = 'mail' | 'rest' | 'sqs' | 'jms'
 export type SubscriptionsIdentifier = string[]
+
+export interface NoticationUserPayload {
+  clientID: string
+  userID: string
+  name: string
+  identifier: string
+  isFree: boolean
+  documentUrl: string | undefined
+  thumbnailUrl: string | undefined
+}
+
+export interface NoticationData {
+  uno: string
+  url: string
+  title: string | undefined
+  text: string | undefined
+  headline: string | undefined
+  urgency: string | number
+  class: string
+  contentCreated: string
+  providerid: string
+  lang: string
+  genreid: string | undefined
+  wordCount: string | number | undefined
+  guid: string
+  abstract: string | undefined
+  thumbnailURL: string | undefined
+  thumbnail: string | undefined
+  subscriptions: NoticationUserPayload[]
+}
+
+// Rest or SQS push format send by notification center
+export interface PostedPushNoticationData {
+  type: string
+  emitter: string
+  version: string
+  uuid: string
+  payload: NoticationData[]
+}
