@@ -3,6 +3,7 @@ import ApiCore from '../src/apicore/api'
 import { Params } from '../src/types'
 
 const configPath = process.env.DOTENV_CONFIG_PATH === undefined && 'apicore.env' || process.env.DOTENV_CONFIG_PATH
+const webstoryUNO = 'newsml.afp.com.20231026T152759Z.doc-33z79vw'
 
 dotenv.config({ path: configPath })
 
@@ -189,29 +190,27 @@ describe('AFP ApiCore Search', () => {
 
   describe('Social story', () => {
     test('should return webstory href', async () => {
-      const uno = 'newsml.afp.com.20230901T150953Z.doc-33u64eh'
       const apicore = new ApiCore({ baseUrl, clientId, clientSecret })
       await apicore.authenticate({ username, password })
-      const story = await apicore.story('newsml.afp.com.20230901T150953Z.doc-33u64eh')
+      const story = await apicore.story(webstoryUNO)
 
       if (story === null) {
         expect(story).toBeTruthy()
       } else {
         expect(typeof story).toBe('object')
-        expect(story.uno).toEqual(uno)
+        expect(story.uno).toEqual(webstoryUNO)
       }
     })
     test('should return webstory content', async () => {
-      const uno = 'newsml.afp.com.20230901T150953Z.doc-33u64eh'
       const apicore = new ApiCore({ baseUrl, clientId, clientSecret })
       await apicore.authenticate({ username, password })
-      const story = await apicore.storycontent('newsml.afp.com.20230901T150953Z.doc-33u64eh')
+      const story = await apicore.storycontent(webstoryUNO)
 
       if (story === null) {
         expect(story).toBeTruthy()
       } else {
         expect(typeof story).toBe('object')
-        expect(story.uno).toEqual(uno)
+        expect(story.uno).toEqual(webstoryUNO)
       }
     })
   })
