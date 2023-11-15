@@ -2,7 +2,7 @@
 import { AuthorizationHeaders, AuthType, ClientCredentials, Token } from '../types'
 import { get, postForm } from '../utils/request'
 
-function btoa (str: string, encoding?: BufferEncoding) {
+export function btoa (str: string, encoding?: BufferEncoding) {
   return Buffer.from(str, encoding).toString('base64')
 }
 
