@@ -1,6 +1,6 @@
-import ApiCoreAuth from './authentication'
+import ApiCoreAuth, { btoa } from './authentication'
 import buildQueryFromParams from '../utils/parametizer'
-import { Subscription, RegisteredSubscription, SubscriptionsIdentifier, RegisteredService, RegisterService, SubscriptionsInService, Params, QuietTime } from '../types'
+import { Subscription, RegisteredSubscription, SubscriptionsIdentifier, RegisteredService, RegisterService, SubscriptionsInService, Params, QuietTime, AuthorizationHeaders } from '../types'
 import defaultSubscriptionParams from '../default-notification-params'
 import { HttpHeaders, get, post, del } from '../utils/request'
 import moment from 'moment-timezone'
@@ -16,7 +16,7 @@ interface Status {
 
 interface CommonNotificationCenterResponse {
   response: {
-    names: string
+    names: string[]
     uno: string
     status: Status
   }
@@ -60,9 +60,28 @@ type SetQuietTimeResponse = CommonNotificationCenterResponse
 
 export class ApiCoreNotificationCenter {
   private auth: ApiCoreAuth
+  private username?: string
+  private password?: string
 
-  constructor (auth: ApiCoreAuth) {
+  constructor (auth: ApiCoreAuth, username?: string, password?: string) {
     this.auth = auth
+    this.username = username
+    this.password = password
+  }
+
+  get authorizationBasicHeaders (): AuthorizationHeaders {
+    if (this.username && this.password) {
+      const auth = btoa(`${this.username}:${this.password}`)
+
+      return {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Authorization: `Basic ${auth}`
+      }
+    }
+
+    return {
+
+    }
   }
 
   get httpHeaders (): HttpHeaders {
@@ -72,6 +91,7 @@ export class ApiCoreNotificationCenter {
       'Content-Type': 'application/json'
     }
   }
+
   private adjustTime (time: string, tz: string = timeZone): string {
     return moment.tz(time, timeFormat, tz).tz(utc).format(timeFormat)
   }
@@ -101,21 +121,49 @@ export class ApiCoreNotificationCenter {
     return `${this.auth.apiUrl}/notification/api`
   }
 
+  get sharedUrl (): string {
+    return `${this.auth.apiUrl}/notification/shared`
+  }
+
   public async authenticate (options: { username?: string; password?: string } = {}) {
     return this.auth.authenticate(options)
+  }
+
+  public async addSubscriptionToSharedService (service: string, clientID: string, userID: string, subscriptions: SubscriptionsIdentifier) {
+    const data: AddNotificationSubscriptionToServiceResponse = await post(`${this.sharedUrl}/service/add`, subscriptions, {
+      headers: this.authorizationBasicHeaders,
+      params: {
+        service: service,
+        cid: clientID,
+        uid: userID
+      }
+    })
+
+    return data.response.names
   }
 
   public async addSubscriptionToService (service: string, subscriptions: SubscriptionsIdentifier) {
     await this.authenticate()
 
     const data: AddNotificationSubscriptionToServiceResponse = await post(`${this.baseUrl}/service/add`, subscriptions, {
-      headers: this.auth.authorizationBearerHeaders,
+      headers: this.authorizationBasicHeaders,
       params: {
         service: service
       }
     })
 
     return data.response.names
+  }
+
+  public async deleteSharedService (service: string) {
+    const data: DeleteServiceResponse = await del(`${this.sharedUrl}/service/delete`, {
+      headers: this.authorizationBasicHeaders,
+      params: {
+        service: service
+      }
+    })
+
+    return data.response.uno
   }
 
   public async deleteService (service: string) {
@@ -131,6 +179,22 @@ export class ApiCoreNotificationCenter {
     return data.response.uno
   }
 
+  public async listSharedServices (clientID: string, userID: string) {
+    const data: ListServiceResponse = await get(`${this.sharedUrl}/service/list`, {
+      headers: {
+        ...this.authorizationBasicHeaders,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'Content-Type': 'application/json'
+      },
+      params: {
+        cid: clientID,
+        uid: userID
+      }
+    })
+
+    return data.response.services
+  }
+
   public async listServices () {
     await this.authenticate()
 
@@ -141,6 +205,14 @@ export class ApiCoreNotificationCenter {
     return data.response.services
   }
 
+  public async registerSharedService (service: RegisterService) {
+    const data: RegisteredServiceResponse = await post(`${this.sharedUrl}/service/register`, service, {
+      headers: this.authorizationBasicHeaders
+    })
+
+    return data.response.uno
+  }
+
   public async registerService (service: RegisterService) {
     await this.authenticate()
 
@@ -149,6 +221,19 @@ export class ApiCoreNotificationCenter {
     })
 
     return data.response.uno
+  }
+
+  public async removeSubscriptionsFromSharedService (service: string, clientID: string, userID: string, subscriptions: SubscriptionsIdentifier) {
+    const data: DeleteNotificationSubscriptionResponse = await del(`${this.sharedUrl}/service/remove`, {
+      headers: this.authorizationBasicHeaders,
+      params: {
+        service: service,
+        cid: clientID,
+        uid: userID
+      }
+    }, subscriptions)
+
+    return data.response.names
   }
 
   public async removeSubscriptionsFromService (service: string, subscriptions: SubscriptionsIdentifier) {
@@ -162,6 +247,23 @@ export class ApiCoreNotificationCenter {
     }, subscriptions)
 
     return data.response.names
+  }
+
+  public async subscriptionsInSharedService (service: string, clientID: string, userID: string) {
+    const data: SubscriptionsInServiceResponse = await get(`${this.sharedUrl}/service/subscriptions`, {
+      headers: {
+        ...this.authorizationBasicHeaders,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'Content-Type': 'application/json'
+      },
+      params: {
+        service: service,
+        cid: clientID,
+        uid: userID
+      }
+    })
+
+    return data.response.subscriptions
   }
 
   public async subscriptionsInService (service: string) {

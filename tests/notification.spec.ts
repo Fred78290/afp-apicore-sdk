@@ -8,7 +8,7 @@ const configPath = process.env.DOTENV_CONFIG_PATH === undefined && 'apicore.env'
 dotenv.config({ path: configPath })
 
 const {
-  APICORE_BASE_URL: baseUrl,
+  APICORE_UAT_URL: baseUrl,
   APICORE_CLIENT_ID: clientId,
   APICORE_CLIENT_SECRET: clientSecret,
   APICORE_USERNAME: username,
@@ -24,6 +24,11 @@ describe('AFP ApiCore Notification', () => {
   const auth = new ApiCoreAuth({ baseUrl, clientId, clientSecret })
   const notificationCenter = new ApiCoreNotificationCenter(auth)
 
+  expect(baseUrl).toBeDefined()
+  expect(clientId).toBeDefined()
+  expect(clientSecret).toBeDefined()
+  expect(username).toBeDefined()
+  expect(password).toBeDefined()
   expect(email).toBeDefined()
 
   test('should return true when notification is instance of ApiCoreNotificationCenter', () => {
