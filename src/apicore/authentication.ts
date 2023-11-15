@@ -29,7 +29,7 @@ export default class ApiCoreAuth {
     } = {}
   ) {
     this.credentials = { apiKey, clientId, clientSecret, customAuthUrl }
-    this.baseUrl = baseUrl || 'https://afp-apicore-prod.afp.com'
+    this.baseUrl = baseUrl ?? 'https://afp-apicore-prod.afp.com'
     if (saveToken) {
       this.saveToken = saveToken
     } else {

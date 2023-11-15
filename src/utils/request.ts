@@ -33,7 +33,7 @@ function apiError (code: number, message?: string) {
 async function fetchText (url: string, method: string, headers: object = {}, body?: any) {
   const response = await fetch(url, {
     method,
-    headers: buildHeaders(Object.assign({}, headers, { Accept: 'text/*' })),
+    headers: buildHeaders({ ...headers, Accept: 'text/*' }),
     body
   })
 
@@ -63,7 +63,7 @@ async function fetchText (url: string, method: string, headers: object = {}, bod
 async function fetchJson (url: string, method: string, headers: object = {}, body?: any) {
   const response = await fetch(url, {
     method,
-    headers: buildHeaders(Object.assign({}, headers, { Accept: 'application/json' })),
+    headers: buildHeaders({...headers, Accept: 'application/json' }),
     body
   })
 
