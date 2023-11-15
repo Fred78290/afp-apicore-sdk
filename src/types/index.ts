@@ -598,6 +598,7 @@ export type ServiceData = HttpServiceData|MailServiceData|ActiveMQServiceData|SQ
 export interface RegisteredService extends ServiceDetail{
   createdDate: string
   lastRegisteredDate: string
+  serviceDatas: ServiceData
 }
 
 export interface ServiceDetail {
