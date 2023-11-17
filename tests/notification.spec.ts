@@ -104,7 +104,6 @@ describe('AFP ApiCore Notification', () => {
         const subscriptions = await notificationCenter.subscriptionsInService(testServiceName)
 
         if (subscriptions) {
-          await Promise.all(subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name, testServiceName)))
           await Promise.all(subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name)))
         }
 
