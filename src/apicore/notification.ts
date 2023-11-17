@@ -45,7 +45,7 @@ interface GetNotificationSubscriptionResponse {
 
 interface ListNotificationSubscriptionResponse {
   response: {
-    subscriptions: RegisteredSubscription[]
+    subscriptions?: RegisteredSubscription[]
     status: Status
   }
 }
