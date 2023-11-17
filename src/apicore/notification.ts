@@ -294,13 +294,14 @@ export class ApiCoreNotificationCenter {
   }
 
   public async deleteSubscription (name: string, service: string) {
+  public async deleteSubscription (name: string) {
     await this.authenticate()
 
     const data: DeleteNotificationSubscriptionResponse = await del(`${this.baseUrl}/subscription/delete`, {
       headers: this.auth.authorizationBearerHeaders,
       params: {
         name: name,
-        service: service
+        service: 'service'
       }
     })
 

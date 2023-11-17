@@ -105,6 +105,7 @@ describe('AFP ApiCore Notification', () => {
 
         if (subscriptions) {
           await Promise.all(subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name, testServiceName)))
+          await Promise.all(subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name)))
         }
 
         await notificationCenter.deleteService(testServiceName)
@@ -167,7 +168,7 @@ describe('AFP ApiCore Notification', () => {
 //    })
 
     test('should delete subscription', async () => {
-      const subscription = await notificationCenter.deleteSubscription(testSubscriptionName, testServiceName)
+      const subscription = await notificationCenter.deleteSubscription(testSubscriptionName)
 
       expect(subscription).toEqual(testSubscriptionName)
     })
