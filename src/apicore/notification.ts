@@ -158,7 +158,7 @@ export class ApiCoreNotificationCenter {
     await this.authenticate()
 
     const data: AddNotificationSubscriptionToServiceResponse = await post(`${this.baseUrl}/service/add`, subscriptions, {
-      headers: this.authorizationBasicHeaders,
+      headers: this.auth.authorizationBearerHeaders,
       params: {
         service: service
       }
