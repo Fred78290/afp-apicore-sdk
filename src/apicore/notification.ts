@@ -50,7 +50,19 @@ interface ListNotificationSubscriptionResponse {
   }
 }
 
-type AddNotificationSubscriptionToServiceResponse = CommonNotificationCenterResponse
+interface Name {
+  name: string
+  status: string
+}
+
+interface AddNotificationSubscriptionToServiceResponse {
+  response: {
+    status: Status
+    names?: Name[]
+  }
+}
+
+type RemoveNotificationSubscriptionToServiceResponse = AddNotificationSubscriptionToServiceResponse
 type UpdateNotificationSubscriptionResponse = CommonNotificationCenterResponse
 type DeleteServiceResponse = CommonNotificationCenterResponse
 type RegisteredServiceResponse = CommonNotificationCenterResponse
@@ -224,7 +236,7 @@ export class ApiCoreNotificationCenter {
   }
 
   public async removeSubscriptionsFromSharedService (service: string, clientID: string, userID: string, subscriptions: SubscriptionsIdentifier) {
-    const data: DeleteNotificationSubscriptionResponse = await del(`${this.sharedUrl}/service/remove`, {
+    const data: RemoveNotificationSubscriptionToServiceResponse = await del(`${this.sharedUrl}/service/remove`, {
       headers: this.authorizationBasicHeaders,
       params: {
         service: service,
@@ -239,7 +251,7 @@ export class ApiCoreNotificationCenter {
   public async removeSubscriptionsFromService (service: string, subscriptions: SubscriptionsIdentifier) {
     await this.authenticate()
 
-    const data: DeleteNotificationSubscriptionResponse = await del(`${this.baseUrl}/service/remove`, {
+    const data: RemoveNotificationSubscriptionToServiceResponse = await del(`${this.baseUrl}/service/remove`, {
       headers: this.auth.authorizationBearerHeaders,
       params: {
         service: service
