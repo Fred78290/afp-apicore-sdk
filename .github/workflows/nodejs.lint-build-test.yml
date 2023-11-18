@@ -24,6 +24,8 @@ jobs:
     - run: npm test
       env:
         APICORE_BASE_URL: ${{ secrets.APICORE_BASE_URL }}
+        APICORE_UAT_URL: ${{ secrets.APICORE_UAT_URL }}
+        APICORE_PROD_URL: ${{ secrets.APICORE_PROD_URL }}
         APICORE_API_KEY: ${{ secrets.APICORE_API_KEY }}
         APICORE_CLIENT_ID: ${{ secrets.APICORE_CLIENT_ID }}
         APICORE_CLIENT_SECRET: ${{ secrets.APICORE_CLIENT_SECRET }}
