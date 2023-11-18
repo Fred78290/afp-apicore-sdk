@@ -192,7 +192,7 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
     return null
   }
 
-  public createNotificationCenter (): ApiCoreNotificationCenter {
-    return new ApiCoreNotificationCenter(this)
+  public createNotificationCenter (sharedServiceUsername?: string, sharedServicePassword?: string): ApiCoreNotificationCenter {
+    return new ApiCoreNotificationCenter(this, sharedServiceUsername, sharedServicePassword)
   }
 }

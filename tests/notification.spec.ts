@@ -31,18 +31,13 @@ describe('AFP ApiCore Notification', () => {
   expect(password).toBeDefined()
   expect(email).toBeDefined()
 
-  test('should return true when notification is instance of ApiCoreNotificationCenter', () => {
-    const test = new ApiCoreNotificationCenter(auth)
-    expect(test instanceof ApiCoreNotificationCenter).toBeTruthy()
-  })
-
-  describe('Service', () => {
+  describe('User service', () => {
 
     beforeEach(async () => {
       await notificationCenter.authenticate({username, password})
     })
 
-    test('should register service', async () => {
+    test('should register user service', async () => {
       if (email) {
         const result = await notificationCenter.registerService({
           name: testServiceName,
@@ -55,7 +50,7 @@ describe('AFP ApiCore Notification', () => {
         }
     })
 
-    test('should contains service', async () => {
+    test('should contains user service', async () => {
       const result = await notificationCenter.listServices()
 
       expect(result).toBeDefined()
@@ -63,13 +58,13 @@ describe('AFP ApiCore Notification', () => {
       expect(result?.map(s => s.serviceName)).toContain(testServiceName)
     })
 
-    test('should return no subscriptions in service', async () => {
+    test('should return no subscriptions in user service', async () => {
       const result = await notificationCenter.subscriptionsInService(testServiceName)
 
       expect(result).toBeUndefined()
     })
 
-    test('should delete service', async () => {
+    test('should delete user service', async () => {
       const result = await notificationCenter.deleteService(testServiceName)
 
       expect(result).toBeDefined()
@@ -77,7 +72,7 @@ describe('AFP ApiCore Notification', () => {
 
   })
 
-  describe('Subscription', () => {
+  describe('User subscription', () => {
     beforeAll(async () => {
       await notificationCenter.authenticate({username, password})
 
@@ -85,7 +80,7 @@ describe('AFP ApiCore Notification', () => {
         const services = await notificationCenter.listServices()
 
         if (services?.map(s => s.serviceName).includes(testServiceName)) {
-          console.warn(`service ${testServiceName} already exists`)
+          console.warn('User service already exists')
         } else {
           await notificationCenter.registerService({
             name: testServiceName,
@@ -97,21 +92,7 @@ describe('AFP ApiCore Notification', () => {
       }
     })
 
-    afterAll(async () => {
-      const services = await notificationCenter.listServices()
-
-      if (services?.map(s => s.serviceName).includes(testServiceName)) {
-        const subscriptions = await notificationCenter.subscriptionsInService(testServiceName)
-
-        if (subscriptions) {
-          await Promise.all(subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name)))
-        }
-
-        await notificationCenter.deleteService(testServiceName)
-      }
-    })
-
-    test('should create a subscription in service', async () => {
+    it('should create a subscription in service', async () => {
       const subscription = notificationCenter.buildSubscription({ langs: 'fr', urgencies: 2, classes: 'text'})
       const services = await notificationCenter.addSubscription(testSubscriptionName, testServiceName, subscription)
 
@@ -171,7 +152,35 @@ describe('AFP ApiCore Notification', () => {
 
       expect(subscription).toEqual(testSubscriptionName)
     })
+  })
 
+  afterAll(() => {
+    console.log('Will delete user service')
+
+    if (clientId && username) {
+      return new Promise(done => {
+        notificationCenter.subscriptionsInService(testServiceName).then((subscriptions) => {
+          const promises: Promise<string>[] = []
+
+          if (subscriptions && subscriptions.length > 0) {
+            console.log('Will delete registered subscription in user service')
+
+            promises.push(...subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name)))
+          }
+
+          return Promise.all(promises)
+        }).then((deleted) => {
+          if (deleted.length > 0) {
+            console.log('All registered subscription in user service deleted')
+          }
+        }).finally(() => {
+          notificationCenter.deleteSharedService(testServiceName)
+            .then(() => console.log('User service deleted'))
+            .catch((e) => console.error(e))
+            .finally(() => done(null))
+        })
+      })
+    }
   })
 
 })

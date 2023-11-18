@@ -25,7 +25,7 @@ function buildForm (form: Object) {
 }
 
 function apiError (code: number, message?: string) {
-  const error: any = new Error(message || status(code) || `Request rejected with status ${code}`)
+  const error: any = new Error(message ?? (status(code) || `Request rejected with status ${code}`))
   error.code = code
   return error
 }

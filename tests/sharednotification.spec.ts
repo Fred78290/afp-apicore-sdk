@@ -126,16 +126,27 @@ describe('AFP ApiCore Shared Notification', () => {
       }
     })
 
-//    test('should remove subscription in shared service', async () => {
-//      if (clientId && username) {
-//        const subscription = await notificationCenter.removeSubscriptionsFromSharedService(testServiceName, clientId, username, [ testSubscriptionName ])
-//
-//        expect(subscription).toContain(testSubscriptionName)
-//      }
-//    })
+    test('should remove subscription from shared service', async () => {
+      if (clientId && username) {
+        const subscription = await notificationCenter.removeSubscriptionsFromSharedService(testServiceName, clientId, username, [ testSubscriptionName ])
+
+        expect(subscription).toBeDefined()
+        expect(subscription?.map(s => s.name)).toContain(testSubscriptionName)
+      }
+    })
+
+    test('should add subscription in shared service', async () => {
+      if (clientId && username) {
+        const subscription = await notificationCenter.addSubscriptionToSharedService(testServiceName, clientId, username, [ testSubscriptionName ])
+
+        expect(subscription).toBeDefined()
+        expect(subscription?.map(s => s.name)).toContain(testSubscriptionName)
+      }
+    })
+
 
     test('should delete subscription in shared service', async () => {
-      const subscription = await notificationCenter.deleteSubscription(testSubscriptionName, testServiceName)
+      const subscription = await notificationCenter.deleteSubscription(testSubscriptionName)
 
       expect(subscription).toEqual(testSubscriptionName)
     })
@@ -149,14 +160,24 @@ describe('AFP ApiCore Shared Notification', () => {
     })
   })
 
-  /*afterAll(() => {
+  afterAll(() => {
     console.log('Will delete shared service')
+
     if (clientId && username) {
       return new Promise(done => {
         notificationCenter.subscriptionsInSharedService(testServiceName, clientId, username).then((subscriptions) => {
+          const promises: Promise<string>[] = []
+
           if (subscriptions && subscriptions.length > 0) {
-            Promise.all(subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name, testServiceName)))
-              .then(() => console.log('All registered subscription in shared service deleted'))
+            console.log('Will delete registered subscription in shared service')
+
+            promises.push(...subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name)))
+          }
+
+          return Promise.all(promises)
+        }).then((deleted) => {
+          if (deleted.length > 0) {
+            console.log('All registered subscription in shared service deleted')
           }
         }).finally(() => {
           notificationCenter.deleteSharedService(testServiceName)
@@ -166,5 +187,5 @@ describe('AFP ApiCore Shared Notification', () => {
         })
       })
     }
-  })*/
+  })
 })

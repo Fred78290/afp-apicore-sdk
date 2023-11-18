@@ -123,6 +123,22 @@ export class ApiCoreNotificationCenter {
     return defaultSubscription
   }
 
+  get sharedServiceUserName (): string | undefined {
+    return this.username
+  }
+
+  set sharedServiceUserName (value: string | undefined) {
+    this.username = value
+  }
+
+  get sharedServicePassword (): string | undefined {
+    return this.password
+  }
+
+  set sharedServicePassword (value: string | undefined) {
+    this.password = value
+  }
+
   get defaultSearchParams (): Params {
     return {
       langs: []
@@ -137,8 +153,24 @@ export class ApiCoreNotificationCenter {
     return `${this.auth.apiUrl}/notification/shared`
   }
 
+  get managerUrl (): string {
+    return `${this.auth.apiUrl}/notification/manager`
+  }
+
   public async authenticate (options: { username?: string; password?: string } = {}) {
     return this.auth.authenticate(options)
+  }
+
+  public async addSubscriptionToManagedService (service: string, userID: string, subscriptions: SubscriptionsIdentifier) {
+    const data: AddNotificationSubscriptionToServiceResponse = await post(`${this.managerUrl}/service/add`, subscriptions, {
+      headers: this.authorizationBasicHeaders,
+      params: {
+        service: service,
+        uid: userID
+      }
+    })
+
+    return data.response.names
   }
 
   public async addSubscriptionToSharedService (service: string, clientID: string, userID: string, subscriptions: SubscriptionsIdentifier) {
@@ -167,6 +199,18 @@ export class ApiCoreNotificationCenter {
     return data.response.names
   }
 
+  public async deleteManagedService (service: string, userID: string) {
+    const data: DeleteServiceResponse = await del(`${this.managerUrl}/service/delete`, {
+      headers: this.auth.authorizationBearerHeaders,
+      params: {
+        service: service,
+        uid: userID
+      }
+    })
+
+    return data.response.uno
+  }
+
   public async deleteSharedService (service: string) {
     const data: DeleteServiceResponse = await del(`${this.sharedUrl}/service/delete`, {
       headers: this.authorizationBasicHeaders,
@@ -189,6 +233,17 @@ export class ApiCoreNotificationCenter {
     })
 
     return data.response.uno
+  }
+
+  public async listManagedServices (userID: string) {
+    const data: ListServiceResponse = await get(`${this.managerUrl}/service/list`, {
+      headers: this.httpHeaders,
+      params: {
+        uid: userID
+      }
+    })
+
+    return data.response.services
   }
 
   public async listSharedServices (clientID: string, userID: string) {
@@ -217,6 +272,17 @@ export class ApiCoreNotificationCenter {
     return data.response.services
   }
 
+  public async registerManagedService (userID: string, service: RegisterService) {
+    const data: RegisteredServiceResponse = await post(`${this.managerUrl}/service/register`, service, {
+      headers: this.auth.authorizationBearerHeaders,
+      params: {
+        uid: userID
+      }
+    })
+
+    return data.response.uno
+  }
+
   public async registerSharedService (service: RegisterService) {
     const data: RegisteredServiceResponse = await post(`${this.sharedUrl}/service/register`, service, {
       headers: this.authorizationBasicHeaders
@@ -233,6 +299,18 @@ export class ApiCoreNotificationCenter {
     })
 
     return data.response.uno
+  }
+
+  public async removeSubscriptionsFromManagedService (service: string, userID: string, subscriptions: SubscriptionsIdentifier) {
+    const data: RemoveNotificationSubscriptionToServiceResponse = await del(`${this.managerUrl}/service/remove`, {
+      headers: this.auth.authorizationBearerHeaders,
+      params: {
+        service: service,
+        uid: userID
+      }
+    }, subscriptions)
+
+    return data.response.names
   }
 
   public async removeSubscriptionsFromSharedService (service: string, clientID: string, userID: string, subscriptions: SubscriptionsIdentifier) {
@@ -259,6 +337,18 @@ export class ApiCoreNotificationCenter {
     }, subscriptions)
 
     return data.response.names
+  }
+
+  public async subscriptionsInManagedService (service: string, userID: string) {
+    const data: SubscriptionsInServiceResponse = await get(`${this.managerUrl}/service/subscriptions`, {
+      headers: this.httpHeaders,
+      params: {
+        service: service,
+        uid: userID
+      }
+    })
+
+    return data.response.subscriptions
   }
 
   public async subscriptionsInSharedService (service: string, clientID: string, userID: string) {
@@ -291,6 +381,21 @@ export class ApiCoreNotificationCenter {
     return data.response.subscriptions
   }
 
+  public async addManagedSubscription (name: string, service: string, userID: string, query: Subscription) {
+    await this.authenticate()
+
+    const data: AddNotificationSubscriptionResponse = await post(`${this.managerUrl}/subscription/add`, query, {
+      headers: this.auth.authorizationBearerHeaders,
+      params: {
+        name: name,
+        uid: userID,
+        service: service
+      }
+    })
+
+    return data.response.uno
+  }
+
   public async addSubscription (name: string, service: string, query: Subscription) {
     await this.authenticate()
 
@@ -305,7 +410,26 @@ export class ApiCoreNotificationCenter {
     return data.response.uno
   }
 
-  public async deleteSubscription (name: string, service: string) {
+  public async deleteManagedSubscription (name: string, userID: string) {
+    await this.authenticate()
+
+    const data: DeleteNotificationSubscriptionResponse = await del(`${this.managerUrl}/subscription/delete`, {
+      headers: this.auth.authorizationBearerHeaders,
+      params: {
+        name: name,
+        uid: userID,
+        service: 'service'
+      }
+    })
+
+    // empty response from apicore
+    if (data.response.status.code === 204) {
+      return name
+    }
+
+    return data.response.uno
+  }
+
   public async deleteSubscription (name: string) {
     await this.authenticate()
 
@@ -325,6 +449,20 @@ export class ApiCoreNotificationCenter {
     return data.response.uno
   }
 
+  public async getManagedSubscription (name: string, userID: string) {
+    await this.authenticate()
+
+    const data: GetNotificationSubscriptionResponse = await get(`${this.managerUrl}/subscription/get`, {
+      headers: this.httpHeaders,
+      params: {
+        name: name,
+        uid: userID
+      }
+    })
+
+    return data.response.subscription
+  }
+
   public async getSubscription (name: string) {
     await this.authenticate()
 
@@ -338,6 +476,19 @@ export class ApiCoreNotificationCenter {
     return data.response.subscription
   }
 
+  public async listManagedSubscriptions (userID: string) {
+    await this.authenticate()
+
+    const data: ListNotificationSubscriptionResponse = await get(`${this.managerUrl}/subscription/list`, {
+      headers: this.httpHeaders,
+      params: {
+        uid: userID
+      }
+    })
+
+    return data.response.subscriptions
+  }
+
   public async listSubscriptions () {
     await this.authenticate()
 
@@ -346,6 +497,21 @@ export class ApiCoreNotificationCenter {
     })
 
     return data.response.subscriptions
+  }
+
+  public async setManagedQuietTime (name: string, userID: string, enabled: boolean, quietTime: QuietTime) {
+    await this.authenticate()
+
+    const data: SetQuietTimeResponse = await post(`${this.managerUrl}/subscription/quiettime`, quietTime, {
+      headers: this.auth.authorizationBearerHeaders,
+      params: {
+        name: name,
+        uid: userID,
+        quiet: enabled
+      }
+    })
+
+    return data.response.uno
   }
 
   public async setQuietTime (name: string, enabled: boolean, quietTime: QuietTime) {
