@@ -160,32 +160,32 @@ describe('AFP ApiCore Shared Notification', () => {
     })
   })
 
-  afterAll(() => {
+  afterAll((done) => {
     console.log('Will delete shared service')
 
     if (clientId && username) {
-      return new Promise(done => {
-        notificationCenter.subscriptionsInSharedService(testServiceName, clientId, username).then((subscriptions) => {
-          const promises: Promise<string>[] = []
+      notificationCenter.subscriptionsInSharedService(testServiceName, clientId, username).then((subscriptions) => {
+        const promises: Promise<string>[] = []
 
-          if (subscriptions && subscriptions.length > 0) {
-            console.log('Will delete registered subscription in shared service')
+        if (subscriptions && subscriptions.length > 0) {
+          console.log('Will delete registered subscription in shared service')
 
-            promises.push(...subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name)))
-          }
+          promises.push(...subscriptions.map(subscription => notificationCenter.deleteSubscription(subscription.name)))
+        }
 
-          return Promise.all(promises)
-        }).then((deleted) => {
-          if (deleted.length > 0) {
-            console.log('All registered subscription in shared service deleted')
-          }
-        }).finally(() => {
-          notificationCenter.deleteSharedService(testServiceName)
-            .then(() => console.log('Shared service deleted'))
-            .catch((e) => console.error(e))
-            .finally(() => done(null))
-        })
+        return Promise.all(promises)
+      }).then((deleted) => {
+        if (deleted.length > 0) {
+          console.log('All registered subscription in shared service deleted')
+        }
+      }).finally(() => {
+        notificationCenter.deleteSharedService(testServiceName)
+          .then(() => console.log('Shared service deleted'))
+          .catch((e) => console.error(e))
+          .finally(() => done())
       })
+    } else {
+      done()
     }
   })
 })

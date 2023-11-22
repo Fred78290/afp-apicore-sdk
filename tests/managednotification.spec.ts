@@ -175,11 +175,10 @@ describe('AFP ApiCore User managed Notification', () => {
       }
     })
 
-    afterAll(() => {
+    afterAll((done) => {
       console.log('Will delete user managed service')
 
       if (managedUserName) {
-        return new Promise(done => {
           notificationCenter.subscriptionsInManagedService(testServiceName, managedUserName).then((subscriptions) => {
             const promises: Promise<string>[] = []
 
@@ -200,9 +199,10 @@ describe('AFP ApiCore User managed Notification', () => {
             notificationCenter.deleteManagedService(testServiceName, managedUserName)
               .then(() => console.log('User managed service deleted'))
               .catch((e) => console.error(e))
-              .finally(() => done(null))
+              .finally(() => done())
           })
-        })
+      } else {
+        done()
       }
     })
   })
