@@ -33,7 +33,7 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
     return defaultSearchParams as Params
   }
 
-  public async query (query: Query) {
+  public async execute (query: Query) {
     const data: ApiCoreResponseDocuments = await post(`${this.baseUrl}/v1/api/search`, query, {
       headers: this.authorizationBearerHeaders
     })
@@ -65,7 +65,7 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
       }
     })
 
-    return this.query(query)
+    return this.execute(query)
   }
 
   public async get (uno: string) {
