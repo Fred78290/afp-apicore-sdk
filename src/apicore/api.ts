@@ -2,7 +2,7 @@ import ApiCoreLiveReport from './livereport'
 import ApiCoreNotificationCenter from './notification'
 import defaultSearchParams from '../default-search-params'
 import buildQueryFromParams from '../utils/parametizer'
-import { ApiCoreResponseDocuments, ApiCoreResponseTopics, ClientCredentials, Lang, Params, Token, SortField, SortOrder, ApiCoreDocument } from '../types'
+import { ApiCoreResponseDocuments, ApiCoreResponseTopics, ClientCredentials, Lang, Params, Token, SortField, SortOrder, ApiCoreDocument, Query } from '../types'
 import { get, gettext, post } from '../utils/request'
 
 interface ApiCoreSocialStoryResponse {
@@ -33,6 +33,19 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
     return defaultSearchParams as Params
   }
 
+  public async query (query: Query) {
+    const data: ApiCoreResponseDocuments = await post(`${this.baseUrl}/v1/api/search`, query, {
+      headers: this.authorizationBearerHeaders
+    })
+
+    const { docs: documents, numFound: count } = data.response
+
+    return {
+      count,
+      documents
+    }
+  }
+
   public async search (params?: Params | null, fields?: string[]) {
     const {
       size: maxRows,
@@ -52,16 +65,7 @@ export default class ApiCoreSearch extends ApiCoreLiveReport {
       }
     })
 
-    const data: ApiCoreResponseDocuments = await post(`${this.baseUrl}/v1/api/search`, query, {
-      headers: this.authorizationBearerHeaders
-    })
-
-    const { docs: documents, numFound: count } = data.response
-
-    return {
-      count,
-      documents
-    }
+    return this.query(query)
   }
 
   public async get (uno: string) {
