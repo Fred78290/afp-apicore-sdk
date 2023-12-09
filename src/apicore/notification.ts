@@ -8,6 +8,7 @@ import moment from 'moment-timezone'
 const timeFormat = 'HH:mm:ss'
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
 const utc = 'UTC'
+const withoutcreditRate = '_withoutcreditRate'
 
 interface Status {
   code: number
@@ -348,7 +349,7 @@ export class ApiCoreNotificationCenter {
       }
     })
 
-    return data.response.subscriptions
+    return data.response.subscriptions?.filter((subscription) => ! subscription.name.endsWith(withoutcreditRate))
   }
 
   public async subscriptionsInSharedService (service: string, clientID: string, userID: string) {
@@ -365,7 +366,7 @@ export class ApiCoreNotificationCenter {
       }
     })
 
-    return data.response.subscriptions
+    return data.response.subscriptions?.filter((subscription) => ! subscription.name.endsWith(withoutcreditRate))
   }
 
   public async subscriptionsInService (service: string) {
@@ -378,7 +379,7 @@ export class ApiCoreNotificationCenter {
       }
     })
 
-    return data.response.subscriptions
+    return data.response.subscriptions?.filter((subscription) => ! subscription.name.endsWith(withoutcreditRate))
   }
 
   public async addManagedSubscription (name: string, service: string, userID: string, query: Subscription) {
