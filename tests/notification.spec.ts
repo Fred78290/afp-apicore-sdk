@@ -106,9 +106,10 @@ describe('AFP ApiCore Notification', () => {
     })
 
     test('should list subscription and found', async () => {
-      const subscription = await notificationCenter.listSubscriptions()
+      const subscriptions = await notificationCenter.listSubscriptions()
 
-      expect(subscription?.map(s => s.name)).toContain(testSubscriptionName)
+      expect(subscriptions?.length).toEqual(1)
+      expect(subscriptions?.map(s => s.name)).toContain(testSubscriptionName)
     })
 
     test('should set quietTime for subscription', async () => {

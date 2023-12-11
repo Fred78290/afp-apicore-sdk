@@ -131,9 +131,10 @@ describe('AFP ApiCore User managed Notification', () => {
 
     test('should list user managed subscription and found', async () => {
       if (managedUserName) {
-        const subscription = await notificationCenter.listManagedSubscriptions(managedUserName)
+        const subscriptions = await notificationCenter.listManagedSubscriptions(managedUserName)
 
-        expect(subscription?.map(s => s.name)).toContain(testSubscriptionName)
+        expect(subscriptions?.length).toEqual(1)
+        expect(subscriptions?.map(s => s.name)).toContain(testSubscriptionName)
       }
     })
 

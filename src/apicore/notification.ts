@@ -487,7 +487,7 @@ export class ApiCoreNotificationCenter {
       }
     })
 
-    return data.response.subscriptions
+    return data.response.subscriptions?.filter((subscription) => ! subscription.name.endsWith(withoutcreditRate))
   }
 
   public async listSubscriptions () {
@@ -497,7 +497,7 @@ export class ApiCoreNotificationCenter {
       headers: this.httpHeaders
     })
 
-    return data.response.subscriptions
+    return data.response.subscriptions?.filter((subscription) => ! subscription.name.endsWith(withoutcreditRate))
   }
 
   public async setManagedQuietTime (name: string, userID: string, enabled: boolean, quietTime: QuietTime) {
